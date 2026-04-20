@@ -1,0 +1,20 @@
+import { ScrollView, Text, View } from 'react-native'
+import { useThemeColor } from '~/lib/use-app-theme'
+
+// Org-scoped index route for {{PKG_NAME}}, served at /a/<orgSlug>/{{PKG_SLUG}}.
+// Replace this placeholder with your list view (cards, table, whatever you
+// need) and wire it to your pbtsdb collections using `useOrgLiveQuery`.
+
+export default function {{PKG_PASCAL}}Index() {
+    const fg = useThemeColor('foreground')
+    const muted = useThemeColor('muted-foreground')
+
+    return (
+        <ScrollView className="flex-1 bg-background">
+            <View className="p-6 gap-3">
+                <Text style={{ color: fg, fontSize: 22, fontWeight: '600' }}>{{PKG_NAME}}</Text>
+                <Text style={{ color: muted, fontSize: 14 }}>Placeholder landing screen for {{PKG_SCOPED}}.</Text>
+            </View>
+        </ScrollView>
+    )
+}

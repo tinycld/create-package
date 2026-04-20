@@ -1,0 +1,20 @@
+package {{PKG_CAMEL}}
+
+import (
+	"github.com/pocketbase/pocketbase"
+)
+
+// Register wires server-side hooks for the {{PKG_NAME}} package. Core's
+// generator injects a call to this function from `server/package_extensions.go`
+// once the package is linked.
+//
+// Typical responsibilities:
+//   - Register audit hooks for your collections (see tinycld.org/audit).
+//   - Bind record lifecycle hooks via `app.OnRecordCreate("...").BindFunc(...)`.
+//   - Register HTTP endpoints via `app.OnServe().BindFunc(func(e *core.ServeEvent)...)`.
+//
+// See ../../../contacts/server/register.go or ../../../calendar/server/register.go
+// for richer examples.
+func Register(_ *pocketbase.PocketBase) {
+	// No server-side logic yet.
+}

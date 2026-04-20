@@ -1,0 +1,42 @@
+{
+    "name": "@tinycld/create-package",
+    "version": "0.1.0",
+    "description": "Scaffolder for @tinycld feature packages",
+    "type": "module",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tinycld/create-package.git"
+    },
+    "bin": {
+        "create-package": "./dist/index.js"
+    },
+    "files": [
+        "dist",
+        "templates"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsx src/index.ts",
+        "lint": "biome check .",
+        "lint:fix": "biome check --write .",
+        "typecheck": "tsc --noEmit",
+        "checks": "bun run lint && bun run typecheck",
+        "test": "vitest run",
+        "prepublishOnly": "bun run build"
+    },
+    "dependencies": {
+        "@clack/prompts": "^0.8.0",
+        "picocolors": "^1.1.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.4.12",
+        "@types/node": "^22.10.0",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.0",
+        "vitest": "^3.0.0"
+    },
+    "engines": {
+        "node": ">=20"
+    }
+}
