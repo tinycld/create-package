@@ -43,14 +43,14 @@ describe('copyTemplate — full preset', () => {
             'biome.json',
             '.gitignore',
             'README.md',
-            'types.ts',
-            'collections.ts',
-            'sidebar.tsx',
-            'provider.tsx',
-            'seed.ts',
-            'screens/_layout.tsx',
-            'screens/index.tsx',
-            'screens/[id].tsx',
+            'tinycld/my-feature/types.ts',
+            'tinycld/my-feature/collections.ts',
+            'tinycld/my-feature/sidebar.tsx',
+            'tinycld/my-feature/provider.tsx',
+            'tinycld/my-feature/seed.ts',
+            'tinycld/my-feature/screens/_layout.tsx',
+            'tinycld/my-feature/screens/index.tsx',
+            'tinycld/my-feature/screens/[id].tsx',
             'pb-migrations/1800000000_create_my-feature.js',
             'server/go.mod',
             'server/register.go',
@@ -105,10 +105,45 @@ describe('copyTemplate — full preset', () => {
 
     it('derives casing variants correctly in component identifiers', () => {
         const target = scaffold()
-        const sidebar = readFileSync(join(target, 'sidebar.tsx'), 'utf8')
+        const sidebar = readFileSync(join(target, 'tinycld/my-feature/sidebar.tsx'), 'utf8')
         expect(sidebar).toContain('MyFeatureSidebar')
-        const provider = readFileSync(join(target, 'provider.tsx'), 'utf8')
+        const provider = readFileSync(join(target, 'tinycld/my-feature/provider.tsx'), 'utf8')
         expect(provider).toContain('MyFeatureProvider')
+    })
+
+    it('manifest references all component paths under tinycld/<slug>/', () => {
+        const target = scaffold()
+        const m = readFileSync(join(target, 'manifest.ts'), 'utf8')
+        expect(m).toContain("directory: 'tinycld/my-feature/screens'")
+        expect(m).toContain("component: 'tinycld/my-feature/sidebar'")
+        expect(m).toContain("component: 'tinycld/my-feature/provider'")
+        expect(m).toContain("register: 'tinycld/my-feature/collections'")
+        expect(m).toContain("script: 'tinycld/my-feature/seed'")
+    })
+
+    it('package.json exports point at nested paths', () => {
+        const target = scaffold()
+        const pkg = JSON.parse(readFileSync(join(target, 'package.json'), 'utf8'))
+        expect(pkg.exports['./types']).toBe('./tinycld/my-feature/types.ts')
+        expect(pkg.exports['./seed']).toBe('./tinycld/my-feature/seed.ts')
+        expect(pkg.exports['./screens/*']).toBe('./tinycld/my-feature/screens/*.tsx')
+    })
+
+    it('tsconfig.json declares the new path aliases', () => {
+        const target = scaffold()
+        const ts = JSON.parse(readFileSync(join(target, 'tsconfig.json'), 'utf8'))
+        expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../core/tinycld/core/*'])
+        expect(ts.compilerOptions.paths['~/tinycld/my-feature/*']).toEqual(['./tinycld/my-feature/*'])
+    })
+
+    it('sibling source files import from @tinycld/core, not ~/', () => {
+        const target = scaffold()
+        const sidebar = readFileSync(join(target, 'tinycld/my-feature/sidebar.tsx'), 'utf8')
+        expect(sidebar).toContain("from '@tinycld/core/lib/use-app-theme'")
+        expect(sidebar).not.toMatch(/from ['"]~\//)
+        const collections = readFileSync(join(target, 'tinycld/my-feature/collections.ts'), 'utf8')
+        expect(collections).toContain("from '@tinycld/core/lib/pocketbase'")
+        expect(collections).toContain("from '@tinycld/core/types/pbSchema'")
     })
 })
 
@@ -130,15 +165,26 @@ describe('copyTemplate — settings-only preset', () => {
             'biome.json',
             '.gitignore',
             'README.md',
-            'types.ts',
-            'settings/main.tsx',
+            'tinycld/my-feature/types.ts',
+            'tinycld/my-feature/settings/main.tsx',
             'tests/manifest.test.ts',
             '.github/workflows/ci.yml',
         ]
         for (const p of shouldExist) {
             expect(existsSync(join(target, p)), `missing ${p}`).toBe(true)
         }
-        const shouldNotExist = ['screens', 'pb-migrations', 'server', 'sidebar.tsx', 'provider.tsx', 'collections.ts']
+        const shouldNotExist = [
+            'screens',
+            'pb-migrations',
+            'server',
+            'sidebar.tsx',
+            'provider.tsx',
+            'collections.ts',
+            'tinycld/my-feature/screens',
+            'tinycld/my-feature/sidebar.tsx',
+            'tinycld/my-feature/provider.tsx',
+            'tinycld/my-feature/collections.ts',
+        ]
         for (const p of shouldNotExist) {
             expect(existsSync(join(target, p)), `unexpected ${p}`).toBe(false)
         }
@@ -150,6 +196,6 @@ describe('copyTemplate — settings-only preset', () => {
         expect(manifest).not.toContain('routes:')
         expect(manifest).not.toContain('server:')
         expect(manifest).toContain('settings: [')
-        expect(manifest).toContain("component: 'settings/main'")
+        expect(manifest).toContain("component: 'tinycld/my-feature/settings/main'")
     })
 })

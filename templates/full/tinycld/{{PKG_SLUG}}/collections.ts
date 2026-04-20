@@ -1,7 +1,7 @@
+import type { CoreStores } from '@tinycld/core/lib/pocketbase'
+import type { Schema } from '@tinycld/core/types/pbSchema'
 import type { createCollection } from 'pbtsdb/core'
 import { BasicIndex } from 'pbtsdb/core'
-import type { CoreStores } from '~/lib/pocketbase'
-import type { Schema } from '~/types/pbSchema'
 import type { {{PKG_PASCAL}}Schema } from './types'
 
 type MergedSchema = Schema & {{PKG_PASCAL}}Schema

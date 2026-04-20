@@ -1,5 +1,5 @@
+import { useThemeColor } from '@tinycld/core/lib/use-app-theme'
 import { Text, View } from 'react-native'
-import { useThemeColor } from '~/lib/use-app-theme'
 
 // Sidebar for the {{PKG_NAME}} package. Rendered in the workspace drawer
 // when a user is on any /a/<orgSlug>/{{PKG_SLUG}}/... route.

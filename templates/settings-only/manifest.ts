@@ -6,7 +6,7 @@ const manifest = {
     settings: [
         {
             slug: '{{PKG_SLUG}}',
-            component: 'settings/main',
+            component: 'tinycld/{{PKG_SLUG}}/settings/main',
             label: '{{PKG_NAME}}',
         },
     ],

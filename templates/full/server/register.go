@@ -11,10 +11,10 @@ import (
 // Typical responsibilities:
 //   - Register audit hooks for your collections (see tinycld.org/audit).
 //   - Bind record lifecycle hooks via `app.OnRecordCreate("...").BindFunc(...)`.
-//   - Register HTTP endpoints via `app.OnServe().BindFunc(func(e *core.ServeEvent)...)`.
+//   - Register HTTP endpoints via `app.OnServe().BindFunc(...)`.
 //
-// See ../../../contacts/server/register.go or ../../../calendar/server/register.go
-// for richer examples.
+// See contacts/server/register.go or calendar/server/register.go for richer
+// examples.
 func Register(_ *pocketbase.PocketBase) {
 	// No server-side logic yet.
 }

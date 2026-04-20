@@ -4,8 +4,10 @@
         "baseUrl": ".",
         "rootDir": "..",
         "paths": {
-            "~/*": ["../core/*"],
-            "@tinycld/*": ["../core/packages/@tinycld/*"]
+            "~/tinycld/{{PKG_SLUG}}/*": ["./tinycld/{{PKG_SLUG}}/*"],
+            "@tinycld/core/*": ["../core/tinycld/core/*"],
+            "@tinycld/*": ["../core/packages/@tinycld/*"],
+            "~/*": ["../core/*"]
         },
         "noEmit": true,
         "preserveSymlinks": false

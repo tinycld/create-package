@@ -1,5 +1,5 @@
+import { useThemeColor } from '@tinycld/core/lib/use-app-theme'
 import { ScrollView, Text, View } from 'react-native'
-import { useThemeColor } from '~/lib/use-app-theme'
 
 // Org-scoped index route for {{PKG_NAME}}, served at /a/<orgSlug>/{{PKG_SLUG}}.
 // Replace this placeholder with your list view (cards, table, whatever you

@@ -7,10 +7,10 @@
     "exports": {
         "./package.json": "./package.json",
         "./manifest": "./manifest.ts",
-        "./types": "./types.ts",
-        "./settings/*": "./settings/*.tsx",
-        "./components/*": "./components/*.tsx",
-        "./hooks/*": "./hooks/*.ts"
+        "./types": "./tinycld/{{PKG_SLUG}}/types.ts",
+        "./settings/*": "./tinycld/{{PKG_SLUG}}/settings/*.tsx",
+        "./components/*": "./tinycld/{{PKG_SLUG}}/components/*.tsx",
+        "./hooks/*": "./tinycld/{{PKG_SLUG}}/hooks/*.ts"
     },
     "scripts": {
         "lint": "biome check .",

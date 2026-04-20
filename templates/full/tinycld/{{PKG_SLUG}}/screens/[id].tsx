@@ -1,6 +1,6 @@
+import { useThemeColor } from '@tinycld/core/lib/use-app-theme'
 import { useLocalSearchParams } from 'expo-router'
 import { Text, View } from 'react-native'
-import { useThemeColor } from '~/lib/use-app-theme'
 
 // Dynamic detail route. Wired automatically by core's generator to
 // /a/<orgSlug>/{{PKG_SLUG}}/<id>.
