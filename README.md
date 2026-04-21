@@ -30,7 +30,7 @@ You'll be walked through an interactive prompt. The positional argument (`my-fea
 | **Nav order** (full only) | `20` | Integer 0–99, controls sidebar position. |
 | **Keyboard shortcut** (full only) | `f` | Single lowercase letter, or blank. |
 | **Include a Go server?** (full only) | `y` / `n` | If no, `server/` and the manifest's `server` field are omitted. |
-| **Target directory** | `../my-feature` | Default puts the new repo alongside `core/`. Must not exist or must be empty. |
+| **Target directory** | `./my-feature` | Default creates the new repo as a child of the current directory. Must not exist or must be empty. |
 
 ### Flags
 

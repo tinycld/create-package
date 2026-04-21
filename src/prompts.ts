@@ -107,7 +107,7 @@ export async function runPrompts(argv: CliArgs): Promise<Answers> {
         )
     }
 
-    const defaultTarget = `../${slug}`
+    const defaultTarget = `./${slug}`
     const rawTarget = cancelIf(
         await text({
             message: 'Target directory',
