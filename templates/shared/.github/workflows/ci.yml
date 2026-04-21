@@ -62,7 +62,7 @@ jobs:
         run: bun install
       - name: Link {{PKG_SLUG}} into core (so ~/types/pbSchema sees its collections)
         working-directory: core
-        run: bun run packages:link {{PKG_SCOPED}} ../{{PKG_SLUG}}
+        run: bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
       - name: Generate PB schema types
         working-directory: core
         run: |
@@ -105,7 +105,7 @@ jobs:
 
       - name: Link {{PKG_SLUG}} into core
         working-directory: core
-        run: bun run packages:link {{PKG_SCOPED}} ../{{PKG_SLUG}}
+        run: bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
 
       - name: Build PocketBase binary
         working-directory: core/server
@@ -113,7 +113,7 @@ jobs:
 
       - name: Run unit tests (vitest picks up {{PKG_SLUG}} via packages glob)
         working-directory: core
-        run: bunx vitest run packages/@tinycld/{{PKG_SLUG}}
+        run: bunx vitest run packages/{{PKG_SLUG}}
 
       - name: Reset test DB
         working-directory: core
@@ -139,7 +139,7 @@ jobs:
         env:
           CI: true
           NODE_OPTIONS: --preserve-symlinks
-        run: bunx playwright test --project "{{PKG_SCOPED}}" --timeout=90000
+        run: bunx playwright test --project "{{PKG_SLUG}}" --timeout=90000
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}

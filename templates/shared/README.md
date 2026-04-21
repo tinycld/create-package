@@ -1,4 +1,4 @@
-# {{PKG_SCOPED}}
+# {{PKG_SLUG}}
 
 {{PKG_DESCRIPTION}}
 
@@ -15,7 +15,7 @@ git clone git@github.com:tinycld/{{PKG_SLUG}}.git
 # Link this package into core
 cd core
 bun install
-bun run packages:link {{PKG_SCOPED}} ../{{PKG_SLUG}}
+bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
 
 # Run the full stack
 bun run dev

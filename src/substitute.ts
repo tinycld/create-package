@@ -17,7 +17,7 @@ export function buildPlaceholders(answers: Answers): PlaceholderMap {
     return {
         '{{PKG_SLUG}}': slug,
         '{{PKG_NAME}}': answers.name,
-        '{{PKG_SCOPED}}': `@tinycld/${slug}`,
+        '{{PKG_SCOPED}}': slug, // kept for back-compat; identical to PKG_SLUG
         '{{PKG_PASCAL}}': toPascalCase(slug),
         '{{PKG_CAMEL}}': toCamelCase(slug),
         '{{PKG_SNAKE}}': slug.replace(/-/g, '_'),

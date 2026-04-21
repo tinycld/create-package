@@ -18,7 +18,7 @@ describe('buildPlaceholders', () => {
         const p = buildPlaceholders(baseAnswers)
         expect(p['{{PKG_SLUG}}']).toBe('my-feature')
         expect(p['{{PKG_NAME}}']).toBe('My Feature')
-        expect(p['{{PKG_SCOPED}}']).toBe('@tinycld/my-feature')
+        expect(p['{{PKG_SCOPED}}']).toBe('my-feature')
         expect(p['{{PKG_PASCAL}}']).toBe('MyFeature')
         expect(p['{{PKG_CAMEL}}']).toBe('myFeature')
         expect(p['{{PKG_SNAKE}}']).toBe('my_feature')

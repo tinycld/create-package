@@ -1,6 +1,6 @@
 /// <reference path="../pb_data/types.d.ts" />
 
-// Initial migration for {{PKG_SCOPED}}. Creates a single `{{PKG_SNAKE}}_items`
+// Initial migration for {{PKG_SLUG}}. Creates a single `{{PKG_SNAKE}}_items`
 // collection matching the shape declared in types.ts / collections.ts.
 // Replace or extend this as you build out the package.
 

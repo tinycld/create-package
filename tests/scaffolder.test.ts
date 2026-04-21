@@ -65,7 +65,7 @@ describe('copyTemplate — full preset', () => {
     it('substitutes placeholders in package.json', () => {
         const target = scaffold()
         const pkg = JSON.parse(readFileSync(join(target, 'package.json'), 'utf8'))
-        expect(pkg.name).toBe('@tinycld/my-feature')
+        expect(pkg.name).toBe('my-feature')
         expect(pkg.description).toBe('Does a thing.')
     })
 
@@ -91,8 +91,8 @@ describe('copyTemplate — full preset', () => {
         const target = scaffold()
         const yml = readFileSync(join(target, '.github/workflows/ci.yml'), 'utf8')
         expect(yml).toContain('path: my-feature')
-        expect(yml).toContain('packages:link @tinycld/my-feature ../my-feature')
-        expect(yml).toContain('--project "@tinycld/my-feature"')
+        expect(yml).toContain('packages:link my-feature ../my-feature')
+        expect(yml).toContain('--project "my-feature"')
         expect(yml).not.toMatch(/\{\{[A-Z_]+\}\}/)
     })
 

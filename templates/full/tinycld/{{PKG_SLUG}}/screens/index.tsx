@@ -13,7 +13,7 @@ export default function {{PKG_PASCAL}}Index() {
         <ScrollView className="flex-1 bg-background">
             <View className="p-6 gap-3">
                 <Text style={{ color: fg, fontSize: 22, fontWeight: '600' }}>{{PKG_NAME}}</Text>
-                <Text style={{ color: muted, fontSize: 14 }}>Placeholder landing screen for {{PKG_SCOPED}}.</Text>
+                <Text style={{ color: muted, fontSize: 14 }}>Placeholder landing screen for {{PKG_SLUG}}.</Text>
             </View>
         </ScrollView>
     )
