@@ -9,11 +9,11 @@ Feature package for the [tinycld](https://github.com/tinycld/core) ecosystem. Li
 ```sh
 # Clone core and this package as siblings
 cd ~/code/tinycld
-git clone git@github.com:tinycld/core.git
+git clone git@github.com:tinycld/core.git tinycld-core
 git clone git@github.com:tinycld/{{PKG_SLUG}}.git
 
 # Link this package into core
-cd core
+cd tinycld-core
 bun install
 bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
 
@@ -24,7 +24,7 @@ bun run dev
 ## Standalone checks
 
 From this directory (linked into core, or with `node_modules` symlinked to
-`../core/node_modules`):
+`../tinycld-core/node_modules`):
 
 ```sh
 bun run lint        # biome

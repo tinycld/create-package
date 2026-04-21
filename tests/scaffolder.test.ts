@@ -132,7 +132,7 @@ describe('copyTemplate — full preset', () => {
     it('tsconfig.json declares the new path aliases', () => {
         const target = scaffold()
         const ts = JSON.parse(readFileSync(join(target, 'tsconfig.json'), 'utf8'))
-        expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../core/tinycld/core/*'])
+        expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../tinycld-core/tinycld/core/*'])
         expect(ts.compilerOptions.paths['~/tinycld/my-feature/*']).toEqual(['./tinycld/my-feature/*'])
     })
 

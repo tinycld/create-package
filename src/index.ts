@@ -3,6 +3,7 @@ import { relative } from 'node:path'
 import { intro, outro } from '@clack/prompts'
 import pc from 'picocolors'
 import { copyTemplate, resolveTemplatesRoot } from './copy-template.ts'
+import { offerLinkCore } from './link-core.ts'
 import { runPrompts } from './prompts.ts'
 
 function parseArgs(argv: readonly string[]): { slug?: string } {
@@ -18,32 +19,44 @@ async function main(): Promise<void> {
 
     copyTemplate(resolveTemplatesRoot(import.meta.url), answers)
 
+    const packageName = `@tinycld/${answers.slug}`
+    const linked = await offerLinkCore({ packageName, targetDir: answers.targetDir })
+
     const relTarget = relative(process.cwd(), answers.targetDir) || answers.targetDir
     outro(pc.green(`Scaffolded ${pc.bold(answers.slug)} at ${pc.bold(relTarget)}`))
 
-    printNextSteps(answers.slug, relTarget)
+    printNextSteps({ slug: answers.slug, relTarget, linked })
 }
 
-function printNextSteps(slug: string, relTarget: string): void {
-    const lines = [
-        '',
-        pc.bold('Next steps:'),
-        '',
-        `  ${pc.dim('# 1. Initialize git and push to GitHub')}`,
-        `  cd ${relTarget}`,
-        '  git init',
-        '  git add .',
-        "  git commit -m 'chore: initial scaffold'",
-        `  gh repo create tinycld/${slug} --public --source=. --push`,
-        '',
-        `  ${pc.dim('# 2. Link into core')}`,
-        '  cd ../core',
-        `  bun run packages:link @tinycld/${slug} ../${slug}`,
-        '',
-        `  ${pc.dim('# 3. Verify')}`,
-        '  bun run checks',
-        '',
-    ]
+interface NextStepsInput {
+    slug: string
+    relTarget: string
+    linked: boolean
+}
+
+function printNextSteps({ slug, relTarget, linked }: NextStepsInput): void {
+    const lines: string[] = ['', pc.bold('Next steps:'), '']
+    let step = 1
+
+    lines.push(`  ${pc.dim(`# ${step++}. Initialize git and push to GitHub`)}`)
+    lines.push(`  cd ${relTarget}`)
+    lines.push('  git init')
+    lines.push('  git add .')
+    lines.push("  git commit -m 'chore: initial scaffold'")
+    lines.push(`  gh repo create tinycld/${slug} --public --source=. --push`)
+    lines.push('')
+
+    if (!linked) {
+        lines.push(`  ${pc.dim(`# ${step++}. Link into core`)}`)
+        lines.push('  cd ../tinycld-core')
+        lines.push(`  bun run packages:link @tinycld/${slug} ../${slug}`)
+        lines.push('')
+    }
+
+    lines.push(`  ${pc.dim(`# ${step++}. Verify`)}`)
+    lines.push('  bun run checks')
+    lines.push('')
+
     // biome-ignore lint/suspicious/noConsole: CLI output
     console.log(lines.join('\n'))
 }

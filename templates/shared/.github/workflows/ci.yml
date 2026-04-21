@@ -26,13 +26,13 @@ jobs:
         with:
           repository: ${{ env.CORE_REPO }}
           ref: ${{ env.CORE_REF }}
-          path: core
+          path: tinycld-core
       - uses: oven-sh/setup-bun@v2
       - name: Install core deps (biome + typescript come from here)
-        working-directory: core
+        working-directory: tinycld-core
         run: bun install
       - name: Expose core's node_modules to {{PKG_SLUG}}
-        run: ln -s ../core/node_modules {{PKG_SLUG}}/node_modules
+        run: ln -s ../tinycld-core/node_modules {{PKG_SLUG}}/node_modules
       - name: Lint {{PKG_SLUG}}
         working-directory: {{PKG_SLUG}}
         run: bun run lint
@@ -48,30 +48,30 @@ jobs:
         with:
           repository: ${{ env.CORE_REPO }}
           ref: ${{ env.CORE_REF }}
-          path: core
+          path: tinycld-core
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v5
         with:
-          node-version-file: core/.node-version
+          node-version-file: tinycld-core/.node-version
       - uses: actions/setup-go@v6
         with:
-          go-version-file: core/server/go.mod
-          cache-dependency-path: core/server/go.sum
+          go-version-file: tinycld-core/server/go.mod
+          cache-dependency-path: tinycld-core/server/go.sum
       - name: Install core deps
-        working-directory: core
+        working-directory: tinycld-core
         run: bun install
       - name: Link {{PKG_SLUG}} into core (so ~/types/pbSchema sees its collections)
-        working-directory: core
+        working-directory: tinycld-core
         run: bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
       - name: Generate PB schema types
-        working-directory: core
+        working-directory: tinycld-core
         run: |
           cd server && go build -o tinycld .
           ./tinycld --dev serve &
           sleep 3
           kill %1 2>/dev/null || true
       - name: Expose core's node_modules to {{PKG_SLUG}}
-        run: ln -s ../core/node_modules {{PKG_SLUG}}/node_modules
+        run: ln -s ../tinycld-core/node_modules {{PKG_SLUG}}/node_modules
       - name: Typecheck {{PKG_SLUG}}
         working-directory: {{PKG_SLUG}}
         env:
@@ -89,34 +89,34 @@ jobs:
         with:
           repository: ${{ env.CORE_REPO }}
           ref: ${{ env.CORE_REF }}
-          path: core
+          path: tinycld-core
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v5
         with:
-          node-version-file: core/.node-version
+          node-version-file: tinycld-core/.node-version
       - uses: actions/setup-go@v6
         with:
-          go-version-file: core/server/go.mod
-          cache-dependency-path: core/server/go.sum
+          go-version-file: tinycld-core/server/go.mod
+          cache-dependency-path: tinycld-core/server/go.sum
 
       - name: Install core deps
-        working-directory: core
+        working-directory: tinycld-core
         run: bun install
 
       - name: Link {{PKG_SLUG}} into core
-        working-directory: core
+        working-directory: tinycld-core
         run: bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
 
       - name: Build PocketBase binary
-        working-directory: core/server
+        working-directory: tinycld-core/server
         run: go build -o tinycld .
 
       - name: Run unit tests (vitest picks up {{PKG_SLUG}} via packages glob)
-        working-directory: core
+        working-directory: tinycld-core
         run: bunx vitest run packages/{{PKG_SLUG}}
 
       - name: Reset test DB
-        working-directory: core
+        working-directory: tinycld-core
         run: bunx tsx scripts/reset-dev-db.ts --url http://127.0.0.1:7091 --data-dir server/pb_test_data
 
       - name: Cache Playwright browsers
@@ -124,18 +124,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('core/bun.lock') }}
+          key: playwright-${{ hashFiles('tinycld-core/bun.lock') }}
       - name: Install Playwright browsers
-        working-directory: core
+        working-directory: tinycld-core
         run: bunx playwright install --with-deps chromium
         if: steps.playwright-cache.outputs.cache-hit != 'true'
       - name: Install Playwright system deps
-        working-directory: core
+        working-directory: tinycld-core
         run: bunx playwright install-deps chromium
         if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Run Playwright tests ({{PKG_SLUG}} project only)
-        working-directory: core
+        working-directory: tinycld-core
         env:
           CI: true
           NODE_OPTIONS: --preserve-symlinks
@@ -145,5 +145,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: core/playwright-report/
+          path: tinycld-core/playwright-report/
           retention-days: 14
