@@ -1,6 +1,6 @@
 # @tinycld/create-package
 
-Interactive scaffolder for `@tinycld` feature packages. One command produces a sibling-repo starter — manifest, CI workflow, lint/typecheck, sample screens, seed, migrations, and (optionally) a Go server — already wired to work with [`tinycld/core`](https://github.com/tinycld/core)'s generator, to pass its CI, and to build against core's `@tinycld/core/**` import convention.
+Interactive scaffolder for `@tinycld` feature packages. One command produces a repo starter — manifest, CI workflow, lint/typecheck, sample screens, seed, migrations, and (optionally) a Go server — already wired to work with [`tinycld/core`](https://github.com/tinycld/core)'s generator, to pass its CI, and to build against core's `@tinycld/core/**` import convention.
 
 Modeled after [`create-vite`](https://github.com/vitejs/vite/tree/main/packages/create-vite): tiny CLI, templates embedded in the published npm package, no runtime network fetch.
 

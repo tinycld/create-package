@@ -12,6 +12,12 @@ export interface LinkCoreInput {
     targetDir: string
 }
 
+/**
+ * Returns true if the user chose to link (even if a subprocess failed —
+ * the error is already logged, and we don't want to follow up with
+ * "here are the manual steps" when the user already expressed intent).
+ * Returns false only if the user declined.
+ */
 export async function offerLinkCore({ packageName, targetDir }: LinkCoreInput): Promise<boolean> {
     const parentDir = dirname(targetDir)
     const coreDir = join(parentDir, CORE_DIR_NAME)
@@ -34,7 +40,7 @@ export async function offerLinkCore({ packageName, targetDir }: LinkCoreInput): 
         if (clone.status !== 0) {
             s.stop(pc.red('Clone failed'), 1)
             log.error(clone.stderr.trim() || 'git clone exited non-zero')
-            return false
+            return true
         }
         s.stop(`Cloned ${CORE_DIR_NAME}`)
     } else {
@@ -47,7 +53,7 @@ export async function offerLinkCore({ packageName, targetDir }: LinkCoreInput): 
     if (inst.status !== 0) {
         install.stop(pc.red('bun install failed'), 1)
         log.error(inst.stderr.trim() || 'bun install exited non-zero')
-        return false
+        return true
     }
     install.stop('Installed core dependencies')
 
@@ -61,7 +67,7 @@ export async function offerLinkCore({ packageName, targetDir }: LinkCoreInput): 
     if (linkResult.status !== 0) {
         link.stop(pc.red('Link failed'), 1)
         log.error(linkResult.stderr.trim() || 'packages:link exited non-zero')
-        return false
+        return true
     }
     link.stop(`Linked ${packageName} into ${CORE_DIR_NAME}`)
 
