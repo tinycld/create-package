@@ -12,6 +12,12 @@
         "noEmit": true,
         "preserveSymlinks": false
     },
-    "include": ["**/*.ts", "**/*.tsx", "../tinycld-core/**/*.d.ts", "../tinycld-core/expo-env.d.ts", "../tinycld-core/.expo/types/**/*.ts"],
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "../tinycld-core/**/*.d.ts",
+        "../tinycld-core/expo-env.d.ts",
+        "../tinycld-core/.expo/types/**/*.ts"
+    ],
     "exclude": ["node_modules", "server", "pb-migrations", "tests/**/*.spec.ts"]
 }

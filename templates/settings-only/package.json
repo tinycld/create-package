@@ -1,5 +1,5 @@
 {
-    "name": "{{PKG_SLUG}}",
+    "name": "@tinycld/{{PKG_SLUG}}",
     "version": "0.1.0",
     "private": true,
     "type": "module",

@@ -7,28 +7,35 @@ import pc from 'picocolors'
 const CORE_REPO_URL = 'git@github.com:tinycld/core.git'
 const CORE_DIR_NAME = 'tinycld-core'
 
+export type LinkMode = 'prompt' | 'accept' | 'skip'
+
 export interface LinkCoreInput {
     packageName: string
     targetDir: string
+    mode: LinkMode
 }
 
 /**
  * Returns true if the user chose to link (even if a subprocess failed —
  * the error is already logged, and we don't want to follow up with
  * "here are the manual steps" when the user already expressed intent).
- * Returns false only if the user declined.
+ * Returns false only if linking was declined or skipped.
  */
-export async function offerLinkCore({ packageName, targetDir }: LinkCoreInput): Promise<boolean> {
+export async function offerLinkCore({ packageName, targetDir, mode }: LinkCoreInput): Promise<boolean> {
+    if (mode === 'skip') return false
+
     const parentDir = dirname(targetDir)
     const coreDir = join(parentDir, CORE_DIR_NAME)
     const coreExists = existsSync(coreDir)
 
-    const prompt = coreExists
-        ? `Link ${pc.bold(packageName)} into ${pc.bold(CORE_DIR_NAME)} now?`
-        : `Clone ${pc.bold(CORE_DIR_NAME)} (shallow) and link ${pc.bold(packageName)} into it now?`
+    if (mode === 'prompt') {
+        const prompt = coreExists
+            ? `Link ${pc.bold(packageName)} into ${pc.bold(CORE_DIR_NAME)} now?`
+            : `Clone ${pc.bold(CORE_DIR_NAME)} (shallow) and link ${pc.bold(packageName)} into it now?`
 
-    const answer = await confirm({ message: prompt, initialValue: true })
-    if (isCancel(answer) || answer !== true) return false
+        const answer = await confirm({ message: prompt, initialValue: true })
+        if (isCancel(answer) || answer !== true) return false
+    }
 
     if (!coreExists) {
         const s = spinner()

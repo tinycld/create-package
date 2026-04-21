@@ -2,30 +2,51 @@
 import { relative } from 'node:path'
 import { intro, outro } from '@clack/prompts'
 import pc from 'picocolors'
+import { ArgParseError, parseArgs } from './args.ts'
 import { copyTemplate, resolveTemplatesRoot } from './copy-template.ts'
 import { offerLinkCore } from './link-core.ts'
 import { runPrompts } from './prompts.ts'
 
-function parseArgs(argv: readonly string[]): { slug?: string } {
-    const positionals = argv.filter((a) => !a.startsWith('-'))
-    return { slug: positionals[0] }
-}
-
 async function main(): Promise<void> {
     intro(pc.bold(pc.cyan('@tinycld/create-package')))
 
-    const args = parseArgs(process.argv.slice(2))
+    let args: ReturnType<typeof parseArgs>
+    try {
+        args = parseArgs(process.argv.slice(2))
+    } catch (err) {
+        if (err instanceof ArgParseError) {
+            // biome-ignore lint/suspicious/noConsole: CLI error output
+            console.error(pc.red('Bad arguments:'))
+            for (const issue of err.issues) {
+                // biome-ignore lint/suspicious/noConsole: CLI error output
+                console.error(`  --${issue.flag}: ${issue.reason}`)
+            }
+            process.exit(2)
+        }
+        throw err
+    }
+
     const answers = await runPrompts(args)
 
     copyTemplate(resolveTemplatesRoot(import.meta.url), answers)
 
-    const packageName = `@tinycld/${answers.slug}`
-    const linked = await offerLinkCore({ packageName, targetDir: answers.targetDir })
+    const linked = await offerLinkCore({
+        packageName: answers.slug,
+        targetDir: answers.targetDir,
+        mode: resolveLinkMode(args),
+    })
 
     const relTarget = relative(process.cwd(), answers.targetDir) || answers.targetDir
     outro(pc.green(`Scaffolded ${pc.bold(answers.slug)} at ${pc.bold(relTarget)}`))
 
     printNextSteps({ slug: answers.slug, relTarget, linked })
+}
+
+function resolveLinkMode(args: ReturnType<typeof parseArgs>): 'prompt' | 'accept' | 'skip' {
+    if (args.link === false) return 'skip'
+    if (args.link === true) return 'accept'
+    if (args.yes === true) return 'accept'
+    return 'prompt'
 }
 
 interface NextStepsInput {
@@ -49,7 +70,7 @@ function printNextSteps({ slug, relTarget, linked }: NextStepsInput): void {
     if (!linked) {
         lines.push(`  ${pc.dim(`# ${step++}. Link into core`)}`)
         lines.push('  cd ../tinycld-core')
-        lines.push(`  bun run packages:link @tinycld/${slug} ../${slug}`)
+        lines.push(`  bun run packages:link ${slug} ../${slug}`)
         lines.push('')
     }
 

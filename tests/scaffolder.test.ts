@@ -65,7 +65,7 @@ describe('copyTemplate — full preset', () => {
     it('substitutes placeholders in package.json', () => {
         const target = scaffold()
         const pkg = JSON.parse(readFileSync(join(target, 'package.json'), 'utf8'))
-        expect(pkg.name).toBe('my-feature')
+        expect(pkg.name).toBe('@tinycld/my-feature')
         expect(pkg.description).toBe('Does a thing.')
     })
 
