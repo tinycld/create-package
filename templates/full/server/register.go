@@ -9,7 +9,7 @@ import (
 // once the package is linked.
 //
 // Typical responsibilities:
-//   - Register audit hooks for your collections (see tinycld.org/audit).
+//   - Register audit hooks for your collections (see tinycld.org/core/audit).
 //   - Bind record lifecycle hooks via `app.OnRecordCreate("...").BindFunc(...)`.
 //   - Register HTTP endpoints via `app.OnServe().BindFunc(...)`.
 //
