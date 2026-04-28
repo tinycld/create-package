@@ -87,13 +87,16 @@ describe('copyTemplate — full preset', () => {
         expect(existsSync(join(target, 'pb-migrations', '1800000000_create_my-feature.js'))).toBe(true)
     })
 
-    it('generates a ci.yml that references the slug and scoped name', () => {
+    it('generates a ci.yml that references the slug and the new app shell', () => {
         const target = scaffold()
         const yml = readFileSync(join(target, '.github/workflows/ci.yml'), 'utf8')
         expect(yml).toContain('path: my-feature')
-        expect(yml).toContain('packages:link my-feature ../my-feature')
-        expect(yml).toContain('--project "my-feature"')
-        expect(yml).not.toMatch(/\{\{[A-Z_]+\}\}/)
+        expect(yml).toContain('CORE_REPO: tinycld/core')
+        expect(yml).toContain('APP_REPO: tinycld/tinycld')
+        expect(yml).toContain('packages:link ../my-feature')
+        // Substituted; no PKG_* placeholders left over (CI uses ${{ env.X }}
+        // and ${{ hashFiles(...) }} which are GH Actions, not our tokens).
+        expect(yml).not.toMatch(/\{\{PKG_[A-Z_]+\}\}/)
     })
 
     it('omits server/ when includeServer is false', () => {
@@ -111,14 +114,18 @@ describe('copyTemplate — full preset', () => {
         expect(provider).toContain('MyFeatureProvider')
     })
 
-    it('manifest references all component paths under tinycld/<slug>/', () => {
+    it('manifest references the short export-map subpaths', () => {
         const target = scaffold()
         const m = readFileSync(join(target, 'manifest.ts'), 'utf8')
-        expect(m).toContain("directory: 'tinycld/my-feature/screens'")
-        expect(m).toContain("component: 'tinycld/my-feature/sidebar'")
-        expect(m).toContain("component: 'tinycld/my-feature/provider'")
-        expect(m).toContain("register: 'tinycld/my-feature/collections'")
-        expect(m).toContain("script: 'tinycld/my-feature/seed'")
+        // Short subpaths match the package.json exports map keys; the
+        // generator maps these to the physical tinycld/<slug>/* layout via
+        // resolveExportPath().
+        expect(m).toContain("directory: 'screens'")
+        expect(m).toContain("component: 'sidebar'")
+        expect(m).toContain("component: 'provider'")
+        expect(m).toContain("register: 'collections'")
+        expect(m).toContain("types: 'types'")
+        expect(m).toContain("script: 'seed'")
     })
 
     it('package.json exports point at nested paths', () => {
@@ -132,7 +139,9 @@ describe('copyTemplate — full preset', () => {
     it('tsconfig.json declares the new path aliases', () => {
         const target = scaffold()
         const ts = JSON.parse(readFileSync(join(target, 'tsconfig.json'), 'utf8'))
-        expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../tinycld-core/tinycld/core/*'])
+        expect(ts.extends).toBe('../core/tsconfig.json')
+        expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../core/tinycld/core/*'])
+        expect(ts.compilerOptions.paths['@tinycld/*']).toEqual(['../tinycld/packages/@tinycld/*'])
         expect(ts.compilerOptions.paths['~/tinycld/my-feature/*']).toEqual(['./tinycld/my-feature/*'])
     })
 
@@ -196,6 +205,6 @@ describe('copyTemplate — settings-only preset', () => {
         expect(manifest).not.toContain('routes:')
         expect(manifest).not.toContain('server:')
         expect(manifest).toContain('settings: [')
-        expect(manifest).toContain("component: 'tinycld/my-feature/settings/main'")
+        expect(manifest).toContain("component: 'settings/main'")
     })
 })
