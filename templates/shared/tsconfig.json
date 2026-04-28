@@ -1,5 +1,5 @@
 {
-    "extends": "../tinycld/packages/@tinycld/core/tsconfig.json",
+    "extends": "../tinycld/tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
         "rootDir": "..",
@@ -14,7 +14,8 @@
     "include": [
         "**/*.ts",
         "**/*.tsx",
-        "../tinycld/packages/@tinycld/core/**/*.d.ts"
+        "../tinycld/uniwind-types.d.ts",
+        "../tinycld/expo-env.d.ts"
     ],
     "exclude": ["node_modules", "server", "pb-migrations", "tests/**/*.spec.ts"]
 }

@@ -140,7 +140,7 @@ describe('copyTemplate — full preset', () => {
     it('tsconfig.json declares the new path aliases', () => {
         const target = scaffold()
         const ts = JSON.parse(readFileSync(join(target, 'tsconfig.json'), 'utf8'))
-        expect(ts.extends).toBe('../tinycld/packages/@tinycld/core/tsconfig.json')
+        expect(ts.extends).toBe('../tinycld/tsconfig.json')
         // Core's source is bundled at tinycld/packages/@tinycld/core/{lib,components,...}/.
         expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../tinycld/packages/@tinycld/core/*'])
         // Cross-sibling imports aren't supported — no @tinycld/* alias.
