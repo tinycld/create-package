@@ -68,9 +68,9 @@ function printNextSteps({ slug, relTarget, linked }: NextStepsInput): void {
     lines.push('')
 
     if (!linked) {
-        lines.push(`  ${pc.dim(`# ${step++}. Link into core`)}`)
-        lines.push('  cd ../tinycld-core')
-        lines.push(`  bun run packages:link ${slug} ../${slug}`)
+        lines.push(`  ${pc.dim(`# ${step++}. Link into the tinycld app shell`)}`)
+        lines.push('  cd ../tinycld')
+        lines.push(`  bun run packages:link ../${slug}`)
         lines.push('')
     }
 
