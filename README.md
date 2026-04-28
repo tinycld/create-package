@@ -1,13 +1,13 @@
 # @tinycld/create-package
 
-Interactive scaffolder for `@tinycld` feature packages. One command produces a repo starter — manifest, CI workflow, lint/typecheck, sample screens, seed, migrations, and (optionally) a Go server — already wired to work with [`tinycld/core`](https://github.com/tinycld/core)'s generator, to pass its CI, and to build against core's `@tinycld/core/**` import convention.
+Interactive scaffolder for `@tinycld` feature packages. One command produces a repo starter — manifest, CI workflow, lint/typecheck, sample screens, seed, migrations, and (optionally) a Go server — already wired to link into the [`tinycld`](https://github.com/tinycld/tinycld) app shell, build against the [`tinycld/core`](https://github.com/tinycld/core) library's `@tinycld/core/**` import convention, and pass its own CI.
 
 Modeled after [`create-vite`](https://github.com/vitejs/vite/tree/main/packages/create-vite): tiny CLI, templates embedded in the published npm package, no runtime network fetch.
 
 ## Requirements
 
 - **[Bun](https://bun.sh)** (recommended) or Node ≥ 20
-- A local `tinycld/core` checkout (the package it scaffolds is designed to be linked into core via `bun run packages:link`). The scaffolder itself doesn't touch core.
+- Local `tinycld/core` (library) and `tinycld/tinycld` (app shell) checkouts as siblings. The scaffolded package's `tsconfig` extends `../core/tsconfig.json` and gets linked into the app shell via `bun run packages:link` from `tinycld/`. The scaffolder can clone both for you on demand (the linking step is interactive).
 - `git` + `gh` if you intend to use the suggested "initial push" next-step — both are optional.
 
 ## Usage
@@ -117,29 +117,29 @@ git add .
 git commit -m 'chore: initial scaffold'
 gh repo create tinycld/my-feature --public --source=. --push
 
-# 2. Link into core so you can develop against it
-cd ../core
-bun run packages:link @tinycld/my-feature ../my-feature
+# 2. Link into the tinycld app shell so you can develop against it
+cd ../tinycld
+bun run packages:link ../my-feature
 
 # 3. Verify
 bun run checks
 ```
 
-Once linked, core's generator wires your manifest into the app automatically: routes appear at `/a/<orgSlug>/my-feature/**`, the sidebar renders, the settings panel shows up, migrations get picked up by PocketBase, etc. No further changes in core are needed.
+Once linked, the app shell's generator wires your manifest in automatically: routes appear at `/a/<orgSlug>/my-feature/**`, the sidebar renders, the settings panel shows up, migrations get picked up by PocketBase, etc. No further changes to `tinycld` or `core` are needed.
 
 ### Running the scaffolded package's own CI locally
 
-The scaffolded `.github/workflows/ci.yml` reproduces the core-link-and-test dance locally. From inside the scaffolded package, with core linked:
+The scaffolded `.github/workflows/ci.yml` reproduces the link-and-check dance locally. From inside the scaffolded package, with `tinycld` (the app shell) available as a sibling and its deps installed:
 
 ```sh
 cd my-feature
-ln -s ../core/node_modules node_modules   # mimics linked-into-core state
-bun run lint                               # biome
-bun run typecheck                          # tsc --noEmit --skipLibCheck
-rm node_modules                            # don't leave this in place
+ln -s ../tinycld/node_modules node_modules   # mimics linked-into-app-shell state
+bun run lint                                  # biome
+bun run typecheck                             # tsc --noEmit --skipLibCheck
+rm node_modules                               # don't leave this in place
 ```
 
-When you push, the workflow does the full thing: checks out core alongside your repo, links your package in, builds PocketBase, runs vitest, runs Playwright against the mounted sibling project. No secrets are needed — the test user and db-reset are ephemeral per-run.
+When you push, the workflow checks out `tinycld/core` and `tinycld/tinycld` alongside your repo, installs the app shell's deps (which pull in core via `file:../core`), links your package into the app shell, and runs lint, typecheck, and vitest.
 
 ## Import conventions the templates assume
 
