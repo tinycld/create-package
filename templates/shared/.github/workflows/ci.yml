@@ -9,14 +9,12 @@ on:
 env:
   CORE_REPO: tinycld/core
   CORE_REF: main
-  TEST_USER_LOGIN: user@tinycld.org
-  TEST_USER_PW: TestUser1234!
-  ADMIN_USER_LOGIN: admin@tinycld.org
-  ADMIN_USER_PW: AdminPass1234!
+  APP_REPO: tinycld/tinycld
+  APP_REF: main
 
 jobs:
-  lint:
-    name: Lint
+  checks:
+    name: Lint, typecheck, unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -26,124 +24,41 @@ jobs:
         with:
           repository: ${{ env.CORE_REPO }}
           ref: ${{ env.CORE_REF }}
-          path: tinycld-core
+          path: core
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ env.APP_REPO }}
+          ref: ${{ env.APP_REF }}
+          path: tinycld
       - uses: oven-sh/setup-bun@v2
-      - name: Install core deps (biome + typescript come from here)
-        working-directory: tinycld-core
+
+      # Installing the app shell's deps also pulls in core via
+      # file:../core, giving us a single node_modules tree with everything
+      # the package needs.
+      - name: Install app shell deps
+        working-directory: tinycld
         run: bun install
-      - name: Expose core's node_modules to {{PKG_SLUG}}
-        run: ln -s ../tinycld-core/node_modules {{PKG_SLUG}}/node_modules
+
+      - name: Link {{PKG_SLUG}} into tinycld app shell
+        working-directory: tinycld
+        run: bun run packages:link ../{{PKG_SLUG}}
+
+      - name: Expose tinycld's node_modules to {{PKG_SLUG}}
+        run: ln -s ../tinycld/node_modules {{PKG_SLUG}}/node_modules
+
       - name: Lint {{PKG_SLUG}}
         working-directory: {{PKG_SLUG}}
         run: bun run lint
 
-  typecheck:
-    name: Typecheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          path: {{PKG_SLUG}}
-      - uses: actions/checkout@v5
-        with:
-          repository: ${{ env.CORE_REPO }}
-          ref: ${{ env.CORE_REF }}
-          path: tinycld-core
-      - uses: oven-sh/setup-bun@v2
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: tinycld-core/.node-version
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: tinycld-core/server/go.mod
-          cache-dependency-path: tinycld-core/server/go.sum
-      - name: Install core deps
-        working-directory: tinycld-core
-        run: bun install
-      - name: Link {{PKG_SLUG}} into core (so ~/types/pbSchema sees its collections)
-        working-directory: tinycld-core
-        run: bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
-      - name: Generate PB schema types
-        working-directory: tinycld-core
-        run: |
-          cd server && go build -o tinycld .
-          ./tinycld --dev serve &
-          sleep 3
-          kill %1 2>/dev/null || true
-      - name: Expose core's node_modules to {{PKG_SLUG}}
-        run: ln -s ../tinycld-core/node_modules {{PKG_SLUG}}/node_modules
-      - name: Typecheck {{PKG_SLUG}}
-        working-directory: {{PKG_SLUG}}
+      # Typecheck runs from inside tinycld so module resolution sees the
+      # full app-shell tree (uniwind augments, expo types, etc) — running
+      # tsc standalone in the package directory misses those.
+      - name: Typecheck (full app shell, package included via link)
+        working-directory: tinycld
         env:
           NODE_OPTIONS: --preserve-symlinks
         run: bun run typecheck
 
-  test:
-    name: Unit & E2E tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          path: {{PKG_SLUG}}
-      - uses: actions/checkout@v5
-        with:
-          repository: ${{ env.CORE_REPO }}
-          ref: ${{ env.CORE_REF }}
-          path: tinycld-core
-      - uses: oven-sh/setup-bun@v2
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: tinycld-core/.node-version
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: tinycld-core/server/go.mod
-          cache-dependency-path: tinycld-core/server/go.sum
-
-      - name: Install core deps
-        working-directory: tinycld-core
-        run: bun install
-
-      - name: Link {{PKG_SLUG}} into core
-        working-directory: tinycld-core
-        run: bun run packages:link {{PKG_SLUG}} ../{{PKG_SLUG}}
-
-      - name: Build PocketBase binary
-        working-directory: tinycld-core/server
-        run: go build -o tinycld .
-
-      - name: Run unit tests (vitest picks up {{PKG_SLUG}} via packages glob)
-        working-directory: tinycld-core
-        run: bunx vitest run packages/{{PKG_SLUG}}
-
-      - name: Reset test DB
-        working-directory: tinycld-core
-        run: bunx tsx scripts/reset-dev-db.ts --url http://127.0.0.1:7091 --data-dir server/pb_test_data
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('tinycld-core/bun.lock') }}
-      - name: Install Playwright browsers
-        working-directory: tinycld-core
-        run: bunx playwright install --with-deps chromium
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-      - name: Install Playwright system deps
-        working-directory: tinycld-core
-        run: bunx playwright install-deps chromium
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-
-      - name: Run Playwright tests ({{PKG_SLUG}} project only)
-        working-directory: tinycld-core
-        env:
-          CI: true
-          NODE_OPTIONS: --preserve-symlinks
-        run: bunx playwright test --project "{{PKG_SLUG}}" --timeout=90000
-
-      - uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: tinycld-core/playwright-report/
-          retention-days: 14
+      - name: Run unit tests
+        working-directory: {{PKG_SLUG}}
+        run: bunx vitest run
