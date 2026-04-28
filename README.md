@@ -7,7 +7,7 @@ Modeled after [`create-vite`](https://github.com/vitejs/vite/tree/main/packages/
 ## Requirements
 
 - **[Bun](https://bun.sh)** (recommended) or Node ≥ 24 (the package's `engines.node` is `>=24`; older Node may work but is unsupported).
-- A local `tinycld/tinycld` (app shell) checkout as a sibling of the package you're scaffolding. The app shell bundles `@tinycld/core` at `packages/@tinycld/core/` and its `bun install` postinstall creates a `../core` symlink in the workspace parent — the scaffolded package's `tsconfig` extends `../core/tsconfig.json` and aliases `@tinycld/core/*` to `../core/*`, both of which resolve through that symlink. Linking is done from the app shell via `bun run packages:link`. **The scaffolder will offer to clone and link the app shell for you** — the linking step is interactive (or scripted via `--link` / `--no-link`).
+- A local `tinycld/tinycld` (app shell) checkout as a sibling of the package you're scaffolding. The app shell bundles `@tinycld/core` at `packages/@tinycld/core/` — the scaffolded package's `tsconfig` extends `../tinycld/packages/@tinycld/core/tsconfig.json` and aliases `@tinycld/core/*` to `../tinycld/packages/@tinycld/core/*`. Linking is done from the app shell via `bun run packages:link`. **The scaffolder will offer to clone and link the app shell for you** — the linking step is interactive (or scripted via `--link` / `--no-link`).
 - `git` + `gh` if you intend to use the suggested "initial push" next-step — both are optional.
 
 ## Usage
@@ -81,11 +81,11 @@ my-feature/
 ├── biome.json                          # same config all tinycld siblings use
 ├── manifest.ts                         # name, slug, routes, nav, collections, seed, server, ...
 ├── package.json                        # @tinycld/my-feature, peer deps, scripts, exports map
-├── tsconfig.json                       # extends ../core/tsconfig.json (where ../core is a symlink the app shell creates)
+├── tsconfig.json                       # extends ../tinycld/packages/@tinycld/core/tsconfig.json
 ├── pb-migrations/
 │   └── 1800000000_create_my-feature.js # creates my_feature_items collection
 ├── server/
-│   ├── go.mod                          # module tinycld.org/packages/my-feature; replaces tinycld.org/core → ../../core/server (resolves via the ../core symlink)
+│   ├── go.mod                          # module tinycld.org/packages/my-feature; replaces tinycld.org/core → ../../tinycld/packages/@tinycld/core/server
 │   └── register.go                     # func Register(app) hook for server-side wiring
 ├── tests/
 │   └── manifest.test.ts                # vitest smoke test of manifest shape
@@ -192,7 +192,7 @@ Hot reload picks up changes in your package the same way as core code, since it'
 The package's `.github/workflows/ci.yml` reproduces the link-and-check dance locally. The shape:
 
 1. Clone `tinycld/tinycld` as a sibling. (Core ships inside the app shell; no separate core clone needed.)
-2. `bun install` inside `tinycld/`. The postinstall (`packages:generate`) creates the `../core` symlink in the workspace parent.
+2. `bun install` inside `tinycld/` (this also runs the package generator via the postinstall hook).
 3. `bun run packages:link ../<your-pkg>` from `tinycld/`.
 4. Lint and unit-test from inside the package directory (with `node_modules` symlinked to `../tinycld/node_modules`).
 5. **Typecheck from inside `tinycld/`**, not from the package — the app shell's tsconfig pulls in `expo`'s base, `uniwind` global type augments (which add `className` to RN components), and the live `~/types/pbSchema` generated from PocketBase. A standalone `tsc` invocation inside the package can't see those.

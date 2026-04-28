@@ -1,12 +1,12 @@
 {
-    "extends": "../core/tsconfig.json",
+    "extends": "../tinycld/packages/@tinycld/core/tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
         "rootDir": "..",
         "paths": {
             "~/tinycld/{{PKG_SLUG}}/*": ["./tinycld/{{PKG_SLUG}}/*"],
-            "@tinycld/core/*": ["../core/*"],
-            "~/*": ["../core/*"]
+            "@tinycld/core/*": ["../tinycld/packages/@tinycld/core/*"],
+            "~/*": ["../tinycld/packages/@tinycld/core/*"]
         },
         "noEmit": true,
         "preserveSymlinks": false
@@ -14,7 +14,7 @@
     "include": [
         "**/*.ts",
         "**/*.tsx",
-        "../core/**/*.d.ts"
+        "../tinycld/packages/@tinycld/core/**/*.d.ts"
     ],
     "exclude": ["node_modules", "server", "pb-migrations", "tests/**/*.spec.ts"]
 }
