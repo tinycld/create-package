@@ -143,6 +143,7 @@ describe('copyTemplate — full preset', () => {
         expect(ts.extends).toBe('../tinycld/tsconfig.json')
         // Core's source is bundled at tinycld/packages/@tinycld/core/{lib,components,...}/.
         expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../tinycld/packages/@tinycld/core/*'])
+        expect(ts.compilerOptions.paths['@tinycld/app-generated/*']).toEqual(['../tinycld/lib/generated/*'])
         // Cross-sibling imports aren't supported — no @tinycld/* alias.
         expect(ts.compilerOptions.paths['@tinycld/*']).toBeUndefined()
         expect(ts.compilerOptions.paths['~/tinycld/my-feature/*']).toEqual(['./tinycld/my-feature/*'])
