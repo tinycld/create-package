@@ -5,8 +5,7 @@
         "rootDir": "..",
         "paths": {
             "~/tinycld/{{PKG_SLUG}}/*": ["./tinycld/{{PKG_SLUG}}/*"],
-            "@tinycld/core/*": ["../core/tinycld/core/*"],
-            "@tinycld/*": ["../tinycld/packages/@tinycld/*"],
+            "@tinycld/core/*": ["../core/*"],
             "~/*": ["../core/*"]
         },
         "noEmit": true,

@@ -91,8 +91,9 @@ describe('copyTemplate — full preset', () => {
         const target = scaffold()
         const yml = readFileSync(join(target, '.github/workflows/ci.yml'), 'utf8')
         expect(yml).toContain('path: my-feature')
-        expect(yml).toContain('CORE_REPO: tinycld/core')
         expect(yml).toContain('APP_REPO: tinycld/tinycld')
+        // CORE_REPO is gone — core ships inside the app shell now.
+        expect(yml).not.toContain('CORE_REPO')
         expect(yml).toContain('packages:link ../my-feature')
         // Substituted; no PKG_* placeholders left over (CI uses ${{ env.X }}
         // and ${{ hashFiles(...) }} which are GH Actions, not our tokens).
@@ -140,8 +141,11 @@ describe('copyTemplate — full preset', () => {
         const target = scaffold()
         const ts = JSON.parse(readFileSync(join(target, 'tsconfig.json'), 'utf8'))
         expect(ts.extends).toBe('../core/tsconfig.json')
-        expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../core/tinycld/core/*'])
-        expect(ts.compilerOptions.paths['@tinycld/*']).toEqual(['../tinycld/packages/@tinycld/*'])
+        // Core's source is flat at packages/@tinycld/core/{lib,components,...}/,
+        // and ../core is a symlink into that location.
+        expect(ts.compilerOptions.paths['@tinycld/core/*']).toEqual(['../core/*'])
+        // Cross-sibling imports aren't supported — no @tinycld/* alias.
+        expect(ts.compilerOptions.paths['@tinycld/*']).toBeUndefined()
         expect(ts.compilerOptions.paths['~/tinycld/my-feature/*']).toEqual(['./tinycld/my-feature/*'])
     })
 

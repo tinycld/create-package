@@ -62,10 +62,8 @@ describe('substitute', () => {
 
     it('leaves unrelated braces alone', () => {
         const placeholders = buildPlaceholders(baseAnswers)
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: deliberate input — the substituter handles {{TOKEN}} but not ${{...}}, and we're verifying that distinction
         const input = 'const x = { y: 1 }; ${{PKG_SLUG}}'
-        // ${{...}} (with dollar prefix) is not a token this substituter handles;
-        // but {{PKG_SLUG}} without the $ IS. The dollar should be preserved as-is
-        // since replaceAll is literal.
         const output = substitute(input, placeholders)
         expect(output).toBe('const x = { y: 1 }; $my-feature')
     })

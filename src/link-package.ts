@@ -4,14 +4,12 @@ import { dirname, join, relative } from 'node:path'
 import { confirm, isCancel, log, spinner } from '@clack/prompts'
 import pc from 'picocolors'
 
-const CORE_REPO_URL = 'git@github.com:tinycld/core.git'
 const APP_REPO_URL = 'git@github.com:tinycld/tinycld.git'
-const CORE_DIR_NAME = 'core'
 const APP_DIR_NAME = 'tinycld'
 
 export type LinkMode = 'prompt' | 'accept' | 'skip'
 
-export interface LinkCoreInput {
+export interface LinkPackageInput {
     packageName: string
     targetDir: string
     mode: LinkMode
@@ -24,36 +22,26 @@ export interface LinkCoreInput {
  * Returns false only if linking was declined or skipped.
  *
  * Linking happens against the tinycld **app shell** (sibling repo
- * `tinycld/tinycld`), which owns `packages:link`. The `core` library
- * sibling is also cloned because the app shell installs it via
- * `file:../core` and the package's tsconfig points at `../core/...`.
+ * `tinycld/tinycld`), which owns `packages:link` and bundles `@tinycld/core`
+ * at `packages/@tinycld/core/`. The app shell's postinstall creates a
+ * `../core` symlink in the workspace parent so this package's tsconfig
+ * (`"@tinycld/core/*": ["../core/*"]`) and its Go server's
+ * `replace tinycld.org/core => ../../core/server` directive both resolve.
  */
-export async function offerLinkCore({ packageName, targetDir, mode }: LinkCoreInput): Promise<boolean> {
+export async function offerLinkPackage({ packageName, targetDir, mode }: LinkPackageInput): Promise<boolean> {
     if (mode === 'skip') return false
 
     const parentDir = dirname(targetDir)
-    const coreDir = join(parentDir, CORE_DIR_NAME)
     const appDir = join(parentDir, APP_DIR_NAME)
-    const coreExists = existsSync(coreDir)
     const appExists = existsSync(appDir)
 
     if (mode === 'prompt') {
-        const missing: string[] = []
-        if (!coreExists) missing.push(CORE_DIR_NAME)
-        if (!appExists) missing.push(APP_DIR_NAME)
-        const prompt =
-            missing.length === 0
-                ? `Link ${pc.bold(packageName)} into ${pc.bold(APP_DIR_NAME)} now?`
-                : `Clone ${pc.bold(missing.join(' + '))} (shallow) and link ${pc.bold(packageName)} into ${pc.bold(APP_DIR_NAME)} now?`
+        const prompt = appExists
+            ? `Link ${pc.bold(packageName)} into ${pc.bold(APP_DIR_NAME)} now?`
+            : `Clone ${pc.bold(APP_DIR_NAME)} (shallow) and link ${pc.bold(packageName)} into it now?`
 
         const answer = await confirm({ message: prompt, initialValue: true })
         if (isCancel(answer) || answer !== true) return false
-    }
-
-    if (!coreExists) {
-        if (!cloneRepo(CORE_REPO_URL, coreDir)) return true
-    } else {
-        log.info(`Using existing ${CORE_DIR_NAME} at ${coreDir}`)
     }
 
     if (!appExists) {

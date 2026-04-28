@@ -1,13 +1,13 @@
 # @tinycld/create-package
 
-Interactive scaffolder for `@tinycld` feature packages. One command produces a repo starter — manifest, CI workflow, lint/typecheck, sample screens, seed, migrations, and (optionally) a Go server — already wired to link into the [`tinycld`](https://github.com/tinycld/tinycld) app shell, build against the [`tinycld/core`](https://github.com/tinycld/core) library's `@tinycld/core/**` import convention, and pass its own CI.
+Interactive scaffolder for `@tinycld` feature packages. One command produces a repo starter — manifest, CI workflow, lint/typecheck, sample screens, seed, migrations, and (optionally) a Go server — already wired to link into the [`tinycld`](https://github.com/tinycld/tinycld) app shell (which bundles `@tinycld/core`), use the `@tinycld/core/**` import convention, and pass its own CI.
 
 Modeled after [`create-vite`](https://github.com/vitejs/vite/tree/main/packages/create-vite): tiny CLI, templates embedded in the published npm package, no runtime network fetch.
 
 ## Requirements
 
 - **[Bun](https://bun.sh)** (recommended) or Node ≥ 24 (the package's `engines.node` is `>=24`; older Node may work but is unsupported).
-- Local `tinycld/core` (library) and `tinycld/tinycld` (app shell) checkouts as siblings of the package you're scaffolding. The scaffolded package's `tsconfig` extends `../core/tsconfig.json`, and linking is done from the app shell via `bun run packages:link`. **The scaffolder will offer to clone and link both for you** — the linking step is interactive (or scripted via `--link` / `--no-link`).
+- A local `tinycld/tinycld` (app shell) checkout as a sibling of the package you're scaffolding. The app shell bundles `@tinycld/core` at `packages/@tinycld/core/` and its `bun install` postinstall creates a `../core` symlink in the workspace parent — the scaffolded package's `tsconfig` extends `../core/tsconfig.json` and aliases `@tinycld/core/*` to `../core/*`, both of which resolve through that symlink. Linking is done from the app shell via `bun run packages:link`. **The scaffolder will offer to clone and link the app shell for you** — the linking step is interactive (or scripted via `--link` / `--no-link`).
 - `git` + `gh` if you intend to use the suggested "initial push" next-step — both are optional.
 
 ## Usage
@@ -31,7 +31,7 @@ You'll be walked through an interactive prompt. The positional argument (`my-fea
 | **Keyboard shortcut** (full only) | `f` | Single lowercase letter, or blank. |
 | **Include a Go server?** (full only) | `y` / `n` | If no, `server/` and the manifest's `server` field are omitted. |
 | **Target directory** | `./my-feature` | Default creates the new repo as a child of the current directory. Must not exist or must be empty. |
-| **Link into the app shell?** | `y` / `n` | After scaffolding, the CLI offers to clone (or use existing) `core` + `tinycld` siblings, run `bun install` in the app shell, and link this package. Suppress with `--no-link`. |
+| **Link into the app shell?** | `y` / `n` | After scaffolding, the CLI offers to clone (or use existing) `tinycld` app shell, run `bun install` in it, and link this package. Suppress with `--no-link`. |
 
 ### Flags (non-interactive use)
 
@@ -75,17 +75,17 @@ Matches the shape of `@tinycld/contacts`, `@tinycld/mail`, `@tinycld/calendar`, 
 
 ```
 my-feature/
-├── .github/workflows/ci.yml           # lint + typecheck + unit tests; clones core + tinycld + links self
+├── .github/workflows/ci.yml           # lint + typecheck + unit tests; clones the tinycld app shell + links self
 ├── .gitignore                          # node_modules, *.tsbuildinfo, bun.lock, .DS_Store
 ├── README.md                           # developer-facing onboarding for this package
 ├── biome.json                          # same config all tinycld siblings use
 ├── manifest.ts                         # name, slug, routes, nav, collections, seed, server, ...
 ├── package.json                        # @tinycld/my-feature, peer deps, scripts, exports map
-├── tsconfig.json                       # extends ../core/tsconfig.json; aliases for @tinycld/core/*
+├── tsconfig.json                       # extends ../core/tsconfig.json (where ../core is a symlink the app shell creates)
 ├── pb-migrations/
 │   └── 1800000000_create_my-feature.js # creates my_feature_items collection
 ├── server/
-│   ├── go.mod                          # module tinycld.org/packages/my-feature; replaces tinycld.org/core → ../../core/server
+│   ├── go.mod                          # module tinycld.org/packages/my-feature; replaces tinycld.org/core → ../../core/server (resolves via the ../core symlink)
 │   └── register.go                     # func Register(app) hook for server-side wiring
 ├── tests/
 │   └── manifest.test.ts                # vitest smoke test of manifest shape
@@ -103,7 +103,7 @@ my-feature/
 
 </details>
 
-The `tinycld/my-feature/` nesting mirrors core's `tinycld/core/` layout and gives the package a stable public API surface: `@tinycld/my-feature/screens/*`, `/sidebar`, `/collections`, etc.
+The `tinycld/my-feature/` nesting gives the package a stable public API surface accessible via the `package.json` `exports` map: `@tinycld/my-feature/screens/*`, `/sidebar`, `/collections`, etc.
 
 ### `settings-only` — service package
 
@@ -191,8 +191,8 @@ Hot reload picks up changes in your package the same way as core code, since it'
 
 The package's `.github/workflows/ci.yml` reproduces the link-and-check dance locally. The shape:
 
-1. Clone `tinycld/core` and `tinycld/tinycld` as siblings.
-2. `bun install` inside `tinycld/` (this also installs core via `file:../core`).
+1. Clone `tinycld/tinycld` as a sibling. (Core ships inside the app shell; no separate core clone needed.)
+2. `bun install` inside `tinycld/`. The postinstall (`packages:generate`) creates the `../core` symlink in the workspace parent.
 3. `bun run packages:link ../<your-pkg>` from `tinycld/`.
 4. Lint and unit-test from inside the package directory (with `node_modules` symlinked to `../tinycld/node_modules`).
 5. **Typecheck from inside `tinycld/`**, not from the package — the app shell's tsconfig pulls in `expo`'s base, `uniwind` global type augments (which add `className` to RN components), and the live `~/types/pbSchema` generated from PocketBase. A standalone `tsc` invocation inside the package can't see those.

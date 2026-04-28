@@ -4,7 +4,7 @@ import { intro, outro } from '@clack/prompts'
 import pc from 'picocolors'
 import { ArgParseError, parseArgs } from './args.ts'
 import { copyTemplate, resolveTemplatesRoot } from './copy-template.ts'
-import { offerLinkCore } from './link-core.ts'
+import { offerLinkPackage } from './link-package.ts'
 import { runPrompts } from './prompts.ts'
 
 async function main(): Promise<void> {
@@ -15,10 +15,8 @@ async function main(): Promise<void> {
         args = parseArgs(process.argv.slice(2))
     } catch (err) {
         if (err instanceof ArgParseError) {
-            // biome-ignore lint/suspicious/noConsole: CLI error output
             console.error(pc.red('Bad arguments:'))
             for (const issue of err.issues) {
-                // biome-ignore lint/suspicious/noConsole: CLI error output
                 console.error(`  --${issue.flag}: ${issue.reason}`)
             }
             process.exit(2)
@@ -30,7 +28,7 @@ async function main(): Promise<void> {
 
     copyTemplate(resolveTemplatesRoot(import.meta.url), answers)
 
-    const linked = await offerLinkCore({
+    const linked = await offerLinkPackage({
         packageName: answers.slug,
         targetDir: answers.targetDir,
         mode: resolveLinkMode(args),
@@ -78,12 +76,10 @@ function printNextSteps({ slug, relTarget, linked }: NextStepsInput): void {
     lines.push('  bun run checks')
     lines.push('')
 
-    // biome-ignore lint/suspicious/noConsole: CLI output
     console.log(lines.join('\n'))
 }
 
 main().catch((err) => {
-    // biome-ignore lint/suspicious/noConsole: CLI error output
     console.error(pc.red('Error:'), err?.message ?? err)
     process.exit(1)
 })
